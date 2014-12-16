@@ -250,55 +250,13 @@ namespace MineFind {
 			#region Fill array with touching counts
 			Parallel.For( 0, MINE_FIELD_HEIGHT, ( Y ) => {
 				Parallel.For( 0, MINE_FIELD_WIDTH, ( X ) => {
-					if( MINE == MineArray[X, Y] )
-						return;
-
-					if( 0 != Y ) {
-						if( 0 != X ) {
-							if( MINE == MineArray[X - 1, Y - 1] ) {
-								++MineArray[X, Y];
-							}
-						}
-
-						if( MINE == MineArray[X, Y - 1] ) {
-							++MineArray[X, Y];
-						}
-
-						if( MINE_FIELD_WIDTH != X + 1 ) {
-							if( MINE == MineArray[X + 1, Y - 1] ) {
-								++MineArray[X, Y];
-							}
-						}
-					}
-
-					if( 0 != X ) {
-						if( MINE == MineArray[X - 1, Y] ) {
-							++MineArray[X, Y];
-						}
-					}
-
-					if( MINE_FIELD_WIDTH != X + 1 ) {
-						if( MINE == MineArray[X + 1, Y] ) {
-							++MineArray[X, Y];
-						}
-					}
-
-					if( MINE_FIELD_HEIGHT != Y + 1 ) {
-						if( 0 != X ) {
-							if( MINE == MineArray[X - 1, Y + 1] ) {
-								++MineArray[X, Y];
-							}
-						}
-
-						if( MINE == MineArray[X, Y + 1] ) {
-							++MineArray[X, Y];
-						}
-
-						if( MINE_FIELD_WIDTH != X + 1 ) {
-							if( MINE == MineArray[X + 1, Y + 1] ) {
-								++MineArray[X, Y];
-							}
-						}
+					if( MINE == MineArray[X, Y] ) {
+						Parallel.For( Clamp( Y - 1, 0, MINE_FIELD_HEIGHT ), Clamp( Y + 2, 0, MINE_FIELD_HEIGHT ), ( NeighborY ) => {
+							Parallel.For( Clamp( X - 1, 0, MINE_FIELD_WIDTH ), Clamp( X + 2, 0, MINE_FIELD_WIDTH ), ( NeighborX ) => {
+								if( MINE != MineArray[NeighborX, NeighborY] )
+									++MineArray[NeighborX, NeighborY];
+							} );
+						} );
 					}
 				} );
 			} );
@@ -317,6 +275,12 @@ namespace MineFind {
 			FoundMines = 0;
 			GameStarted = true;
 			GameStart = DateTime.Now;
+		}
+
+		private static int Clamp( int Value, int MinValue, int MaxValue ) {
+			if( Value < MinValue ) return MinValue;
+			if( Value > MaxValue ) return MaxValue;
+			return Value;
 		}
 	}
 }
